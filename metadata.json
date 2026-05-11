@@ -1,0 +1,14 @@
+{
+  "name": "ProctorAI: AI-Powered Interview System",
+  "description": "Professional interview platform with AI-generated questions, real-time proctoring, and comprehensive evaluation reports.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "AI-generated questions from resumes",
+    "Real-time proctoring and cheating detection",
+    "Performance evaluation reports",
+    "Live interview recording"
+  ]
+}
