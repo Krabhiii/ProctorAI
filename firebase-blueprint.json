@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user account information and virtual currency balance.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "coins": { "type": "number", "description": "Current virtual currency balance." },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "coins", "createdAt", "updatedAt"]
+    },
+    "Interview": {
+      "title": "Interview Session",
+      "description": "Stores details of past interviews.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "role": { "type": "string" },
+        "experience": { "type": "string" },
+        "questions": { "type": "array" },
+        "answers": { "type": "object" },
+        "report": { "type": "object" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "role", "timestamp"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profile document."
+    },
+    "interviews/{interviewId}": {
+      "schema": "Interview",
+      "description": "Individual interview session data."
+    }
+  }
+}

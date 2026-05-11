@@ -8,8 +8,11 @@ import {
   ShieldCheck, 
   Timer,
   Video,
-  RefreshCcw
+  RefreshCcw,
+  Coins,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '../lib/auth';
 
 interface SetupScreenProps {
   onStart: (role: string, experience: string) => void;
@@ -19,6 +22,7 @@ interface SetupScreenProps {
 export const SetupScreen: React.FC<SetupScreenProps> = ({ onStart, isLoading }) => {
   const [role, setRole] = useState('');
   const [experience, setExperience] = useState('');
+  const { profile, logOut } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +36,25 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onStart, isLoading }) 
       {/* 3D Background Elements */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-primary/20 rounded-full blur-[120px] animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brand-secondary/20 rounded-full blur-[120px] animate-pulse delay-700" />
+
+      {/* User Header */}
+      <div className="absolute top-6 right-6 flex items-center gap-4 z-20">
+        <div className="bg-brand-card border border-white/5 px-4 py-2 rounded-xl flex items-center gap-3 shadow-lg">
+          <div className="bg-brand-primary/10 p-1.5 rounded-lg">
+            <Coins className="text-brand-primary" size={16} />
+          </div>
+          <div className="text-left">
+            <div className="text-[8px] font-black text-gray-500 uppercase tracking-widest font-mono">Credits</div>
+            <div className="text-sm font-black text-white font-mono">{profile?.coins ?? 0}</div>
+          </div>
+        </div>
+        <button 
+          onClick={logOut}
+          className="p-3 bg-white/5 border border-white/10 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+        >
+          <LogOut size={20} />
+        </button>
+      </div>
 
       <motion.div
         initial={{ opacity: 0, rotateX: 20, y: 40 }}
@@ -93,7 +116,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onStart, isLoading }) 
             <motion.button
               whileTap={{ scale: 0.98 }}
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || (profile?.coins ?? 0) < 50}
               className="w-full bg-brand-primary text-white py-5 rounded-xl font-bold text-sm uppercase tracking-[0.2em] shadow-glow hover:brightness-110 transition-all flex items-center justify-center gap-3 disabled:opacity-50 relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
@@ -102,9 +125,11 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onStart, isLoading }) 
                   <RefreshCcw className="animate-spin" size={18} />
                   Compiling Challenge...
                 </>
+              ) : (profile?.coins ?? 0) < 50 ? (
+                <>Insufficient Credits (-50)</>
               ) : (
                 <>
-                  Initiate Session
+                  Initiate Session (-50 Credits)
                   <Send size={16} />
                 </>
               )}

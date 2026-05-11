@@ -10,10 +10,15 @@ import { SetupScreen } from './components/SetupScreen';
 import { InterviewLayout } from './components/InterviewLayout';
 import { ReportScreen } from './components/ReportScreen';
 import { ProctoringOverlay } from './components/ProctoringOverlay';
+import { useAuth } from './lib/auth';
+import { AuthScreen } from './components/AuthScreen';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from './lib/firebase';
 
 type AppState = 'idle' | 'interviewing' | 'submitting' | 'finished';
 
 export default function App() {
+  const { user, profile, loading: authLoading, deductCoins } = useAuth();
   const [state, setState] = useState<AppState>('idle');
   const [session, setSession] = useState<InterviewSession | null>(null);
   const [report, setReport] = useState<EvaluationReport | null>(null);
@@ -22,8 +27,16 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
 
   const startInterview = async (role: string, experience: string) => {
+    if (!profile || profile.coins < 50) return;
+
     setIsLoading(true);
     try {
+      // Deduct coins first
+      const success = await deductCoins(50);
+      if (!success) {
+        throw new Error("Failed to deduct credits");
+      }
+
       const qns = await geminiService.generateQuestions(role, experience);
       const newSession: InterviewSession = {
         id: Math.random().toString(36).substr(2, 9),
@@ -90,6 +103,21 @@ export default function App() {
       if (session) {
         const finalReport = await geminiService.evaluateInterview(session);
         setReport(finalReport);
+        
+        // Save to Firestore
+        if (user) {
+          await addDoc(collection(db, 'interviews'), {
+            userId: user.uid,
+            role: session.role,
+            experience: session.experience,
+            questions: session.questions,
+            answers: session.answers,
+            report: finalReport,
+            proctoringScore: session.proctoringScore,
+            timestamp: serverTimestamp()
+          });
+        }
+
         setState('finished');
       }
     } catch (err) {
@@ -97,6 +125,18 @@ export default function App() {
       setState('interviewing');
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-brand-bg flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
 
   if (state === 'idle') {
     return <SetupScreen onStart={startInterview} isLoading={isLoading} />;

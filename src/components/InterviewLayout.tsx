@@ -10,8 +10,10 @@ import {
   Mic,
   MicOff,
   Video,
-  FileText
+  FileText,
+  Coins
 } from 'lucide-react';
+import { useAuth } from '../lib/auth';
 import { Question, InterviewSession } from '../types';
 import { cn } from '../lib/utils';
 
@@ -30,6 +32,7 @@ export const InterviewLayout: React.FC<InterviewLayoutProps> = ({
   onFlag,
   flaggedIds
 }) => {
+  const { profile } = useAuth();
   const [currentIdx, setCurrentIdx] = useState(0);
   const [timeLeft, setTimeLeft] = useState(1800); // 30 mins
   const [answer, setAnswer] = useState('');
@@ -81,6 +84,12 @@ export const InterviewLayout: React.FC<InterviewLayoutProps> = ({
         
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4 bg-black/40 px-4 py-1.5 rounded-lg border border-white/5 shadow-inner">
+            <div className="flex items-center gap-2 border-r border-white/10 pr-4">
+              <Coins size={14} className="text-brand-accent h-4 w-4" />
+              <span className="text-sm font-mono font-bold text-white tabular-nums">
+                {profile?.coins ?? 0}
+              </span>
+            </div>
             <div className="flex items-center gap-2">
               <Clock size={14} className="text-brand-primary" />
               <span className="text-sm font-mono font-bold tracking-tight text-white tabular-nums">
